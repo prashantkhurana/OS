@@ -463,3 +463,30 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+int getproc (void)
+{
+	
+	struct proc *p;
+	char *p4;
+	int size=0;
+	acquire(&ptable.lock);
+	argptr(0, &p4,2400);
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+	{ 
+		if(p->state!=UNUSED)
+		{
+			memmove(p4+size,&(p->pid),4);
+			size=size+4;
+			memmove(p4+size,&(p->name),16);
+			size=size+16;
+			memmove(p4+size,&(p->state),4);
+			size=size+4;
+		}
+	}
+  
+  	release(&ptable.lock);
+	return size;
+}
+
