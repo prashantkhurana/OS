@@ -100,9 +100,9 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_getproc(void);
 extern int sys_getproc_bad(void);
+extern int sys_sysreplace(void);
 
-
-static int (*syscalls[])(void) = {
+int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
 [SYS_wait]    sys_wait,
@@ -124,7 +124,8 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_getproc] sys_getproc_bad
+[SYS_getproc] sys_getproc_bad,
+[SYS_sysreplace] sys_sysreplace
 };
 
 void
@@ -141,3 +142,6 @@ syscall(void)
     proc->tf->eax = -1;
   }
 }
+
+
+

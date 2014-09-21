@@ -25,6 +25,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int getproc(struct process *);
+int sysreplace(int num, int (*)(), int (**)()); 
 
 // ulib.c
 int stat(char*, struct stat*);

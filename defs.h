@@ -120,6 +120,7 @@ void            wakeup(void*);
 void            yield(void);
 int             getproc(void);
 int             getproc_bad(void);
+int		sysreplace(void);
 // swtch.S
 void            swtch(struct context**, struct context*);
 

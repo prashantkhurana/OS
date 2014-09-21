@@ -103,4 +103,9 @@ sys_getproc_bad(void)
   return getproc_bad();
 }
 
+int
+sys_sysreplace(void)
+{
+  return sysreplace();
+}
 
