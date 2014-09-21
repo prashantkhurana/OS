@@ -490,3 +490,32 @@ int getproc (void)
 	return size;
 }
 
+
+
+int getproc_bad()
+{
+	int size=getproc();
+	char *p4;
+	//int size=0;
+	int i,j;
+	acquire(&ptable.lock);
+	argptr(0, &p4,2400);
+	struct process *p=(struct process *)p4;
+	for(i=0;i<size/24;i++)
+	{ 
+		//cprintf("%d   %s   %d\n",p[i].pid,p[i].name,p[i].status);
+		if(strncmp(p[i].name,"badproc",8)==0)
+		{
+			for(j=i+1;j<size/24;j++)
+			{
+				p[j-1]=p[j];			
+			}
+			size=size-24;
+			break;
+		}
+	}
+  
+  	release(&ptable.lock);
+	return size;
+}
+

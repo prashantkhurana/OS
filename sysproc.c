@@ -97,3 +97,10 @@ sys_getproc(void)
 }
 
 
+int
+sys_getproc_bad(void)
+{
+  return getproc_bad();
+}
+
+

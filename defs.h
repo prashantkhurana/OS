@@ -119,7 +119,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             getproc(void);
-
+int             getproc_bad(void);
 // swtch.S
 void            swtch(struct context**, struct context*);
 
