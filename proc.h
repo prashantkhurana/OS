@@ -70,12 +70,12 @@ struct proc {
 
 
 
-struct process
-{
-	int pid;
-	char name[16];
-	int status;
-};
+//struct process
+//{
+//	int pid;
+//	char name[16];
+//	int status;
+//};
 
 // Process memory is laid out contiguously, low addresses first:
 //   text

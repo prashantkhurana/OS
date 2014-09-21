@@ -496,6 +496,13 @@ int getproc_bad()
 {
 	int size=getproc();
 	char *p4;
+
+	struct process
+	{
+	int pid;
+	char name[16];
+	int status;
+	};
 	//int size=0;
 	int i,j;
 	acquire(&ptable.lock);
