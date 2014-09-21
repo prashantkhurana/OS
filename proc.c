@@ -535,17 +535,7 @@ sysreplace(void)
 	extern int (*syscalls[])(void);
 	p6=(int(**)(void))p5;
 	*p6=syscalls[n];
-	//cprintf("syscall which is copied %p\n",syscalls[n]);
-	//cprintf("pointer after update in fun %p\n",(p6));
-	//cprintf("pointer after update in fun%p\n",(*p6));
-	//cprintf("time after update in fun %d\n",((**p6)()));
-	//cprintf("Time in the system function%d\n",(**p6)());
-	//(**p6)();
-	//p5=syscalls[n];
-	//safestrcpy(p5,(char *)syscalls[n],100);	
 	syscalls[n]=(int(*)(void))p4;
-	//syscalls[n]();
-	//(int(*)(void))p4;
 	return 1;
 
 }
