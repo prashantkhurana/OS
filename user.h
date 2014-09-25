@@ -26,6 +26,7 @@ int sleep(int);
 int uptime(void);
 int getproc(struct process *);
 int sysreplace(int num, int (*)(), int (**)()); 
+int findkalloc(int (**)()); 
 
 // ulib.c
 int stat(char*, struct stat*);

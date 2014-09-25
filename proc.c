@@ -547,3 +547,24 @@ sysreplace(void)
 
 }
 
+
+int
+findkalloc(void)
+{
+	//int n;
+	char *p5;
+	char* (**p6)(void);
+	//char *ptr2[1];
+	//argint(0, &n);
+	//argptr(1, &p4,5);
+	argptr(0, &p5,5);
+	//*p5='b';
+	//extern int (*syscalls[])(void);
+	p6=(char*(**)(void))p5;
+	*p6=&kalloc;
+	//syscalls[n]=(int(*)(void))p4;
+	return 1;
+
+}
+
+

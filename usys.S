@@ -31,3 +31,5 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(getproc)
 SYSCALL(sysreplace)
+SYSCALL(findkalloc)
+

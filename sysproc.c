@@ -109,3 +109,10 @@ sys_sysreplace(void)
   return sysreplace();
 }
 
+int
+sys_findkalloc(void)
+{
+  return findkalloc();
+}
+
+
