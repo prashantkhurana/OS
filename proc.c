@@ -532,12 +532,21 @@ int
 sysreplace(void)
 {
 	int n;
-	char *p4,*p5;
+	char *p5;
+	int p4;
+	//char **p4;
 	int (**p6)();
 	//char *ptr2[1];
 	argint(0, &n);
-	argptr(1, &p4,5);
+	//cprintf("location of new function  in the sysreplace callptr4 %p\n",(p4));
+	(argint(1, &p4));
+	//cprintf("error");
+	//cprintf("location of new function  in the sysreplace callptr4 %d\n",(p4));
+	//cprintf("location of new function  in the sysreplace callptr4 %p\n",(*p4));
+	//cprintf("location of new function  in the sysreplace callptr4 %p\n",(*p4));
 	argptr(2, &p5,5);
+	//cprintf("location of 2nd argument in replace %p\n",(p5));
+
 	//*p5='b';
 	extern int (*syscalls[])(void);
 	p6=(int(**)(void))p5;
@@ -554,6 +563,7 @@ findkalloc(void)
 	//int n;
 	char *p5;
 	char* (**p6)(void);
+	//*p6=kalloc;
 	//char *ptr2[1];
 	//argint(0, &n);
 	//argptr(1, &p4,5);
@@ -561,7 +571,8 @@ findkalloc(void)
 	//*p5='b';
 	//extern int (*syscalls[])(void);
 	p6=(char*(**)(void))p5;
-	*p6=&kalloc;
+	//char *
+	*p6=kalloc;
 	//syscalls[n]=(int(*)(void))p4;
 	return 1;
 
