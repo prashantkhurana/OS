@@ -19,6 +19,7 @@ fetchint(uint addr, int *ip)
 {
   if(addr >= proc->sz || addr+4 > proc->sz)
     return -1;
+	//cprintf("in the function fetch int and the address of the list is %x",addr);
   *ip = *(int*)(addr);
   return 0;
 }
@@ -126,7 +127,7 @@ int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_getproc] sys_getproc_bad,
+[SYS_getproc] sys_getproc,
 [SYS_sysreplace] sys_sysreplace,
 [SYS_findkalloc] sys_findkalloc
 };

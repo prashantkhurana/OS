@@ -98,10 +98,10 @@ main(int argc, char *argv[])
 //	printf(1,"location of new function ptr4 %p\n",(ptr4));
 //	printf(1,"location of new function *ptr4 %p\n",(*ptr4));
 	//printf(1,"location of 2nd argument %p\n",(ptr6));
-	int esp=454;
+	//int esp=454;
 	//asm ("mov %%esp, %0" : "=g" (esp));
-	int (*ptr10)()=(int(*)(void))(esp-4);
-	ptr10++;
+	//int (*ptr10)()=(int(*)(void))(esp-4);
+	//ptr10++;
 //	printf(1,"amount memory copied %d\n",&myuptime1-&myuptime);
 	sysreplace(14,ptr4,ptr6);
 //	printf(1,"location of new function %p\n",(ptr4));
