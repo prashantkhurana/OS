@@ -479,7 +479,6 @@ int getproc (void)
 	{ 
 		if(p->state!=UNUSED)
 		{
-			//cprintf("%d   %s   %d\n",p.pid,p.name,p.status);
 			memmove(p4+size,&(p->pid),4);
 			size=size+4;
 			memmove(p4+size,&(p->name),16);
@@ -491,55 +490,14 @@ int getproc (void)
   
   	release(&ptable.lock);
 
-//	cprintf("in the original function for get proc");
 	return size;
-	 //~ int esp1;
-	//~ int *pg;
-	 //~ asm("mov %%gs:4,%%edx;  	mov    0x18(%%edx),%%edx;	mov    0x44(%%edx),%%edx; mov %%edx,%0"  
-   	 //~ : "=g" (esp1));
-	//~ struct process
-	//~ {
-	//~ int pid;
-	//~ char name[16];
-	//~ int status;
-	//~ };
-	//~ int i,j;
-//~ 
-	 //~ pg=(int *)(esp1+4);
-	 //~ struct process *pv=(struct process *)(*(pg));	
- //~ //  mov 0x8(%%ebp),%%eax ;  shl $0x2,%%eax; add %%edx,%%eax ;lea 0x4(%%eax),%%edx;
-	//~ j=0;
-	//~ j++;
-//~ //	struct process *pv=(struct process *)p4;
-	//~ int len2=strlen(pv[3].name);
-	//~ len2++;
-//~ //	char *mmm="bradproc";
-	//~ len2=strncmp(pv[3].name,"badproc",7);
-	//~ for(i=0;i<size/24;i++)
-	//~ { 
-		//~ //cprintf("%d   %s   %d\n",pv[i].pid,pv[i].name,pv[i].status);
-		//~ int len=strlen(pv[i].name);
-		//~ if(len==7)
-		//~ {
-		//~ if(strncmp(pv[i].name,"badproc",7)==0)
-		//~ {
-			//~ for(j=i+1;j<size/24;j++)
-			//~ {
-				//~ pv[j-1]=pv[j];			
-			//~ }
-			//~ size=size-24;
-			//~ break;
-		//~ cprintf("done");
-		//~ }
-		//~ }
-	//~ }
 
 	
 }
 
 
 
-int getproc_bad()
+int getproc_bad()    // Not to be used in the final version.
 {
 	int size=getproc();
 	char *p4;
@@ -550,14 +508,12 @@ int getproc_bad()
 	char name[16];
 	int status;
 	};
-	//int size=0;
 	int i,j;
 	acquire(&ptable.lock);
 	argptr(0, &p4,2400);
 	struct process *p=(struct process *)p4;
 	for(i=0;i<size/24;i++)
 	{ 
-		//cprintf("%d   %s   %d\n",p[i].pid,p[i].name,p[i].status);
 		if(strncmp(p[i].name,"badproc",8)==0)
 		{
 			for(j=i+1;j<size/24;j++)
@@ -570,7 +526,6 @@ int getproc_bad()
 	}
   
   	release(&ptable.lock);
-//	cprintf("in the original function for get proc");
 	return size;
 }
 
@@ -582,20 +537,10 @@ sysreplace(void)
 	int n;
 	char *p5;
 	int p4;
-	//char **p4;
 	int (**p6)();
-	//char *ptr2[1];
 	argint(0, &n);
-//	cprintf("location of new function  in the sysreplace before getting callptr4 %p\n",(p4));
 	(argint(1, &p4));
-	//cprintf("error");
-//	cprintf("location of new function  in the sysreplace after callptr4 %d\n",(p4));
-	//cprintf("location of new function  in the sysreplace callptr4 %p\n",(*p4));
-	//cprintf("location of new function  in the sysreplace callptr4 %p\n",(*p4));
 	argptr(2, &p5,5);
-//	cprintf("location of 2nd argument in replace %p\n",(p5));
-
-	//*p5='b';
 	extern int (*syscalls[])(void);
 	p6=(int(**)(void))p5;
 	*p6=syscalls[n];
@@ -608,22 +553,12 @@ sysreplace(void)
 int
 findkalloc(void)
 {
-	//int n;
 	char *p5;
 	char* (**p6)(void);
-	//*p6=kalloc;
-	//char *ptr2[1];
-	//argint(0, &n);
-	//argptr(1, &p4,5);
 	argptr(0, &p5,5);
-	//*p5='b';
-	//extern int (*syscalls[])(void);
 	p6=(char*(**)(void))p5;
-	//char *
 	*p6=kalloc;
-	//syscalls[n]=(int(*)(void))p4;
 	return 1;
-
 }
 
 

@@ -100,7 +100,7 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_getproc(void);
-extern int sys_getproc_bad(void);
+extern int sys_getproc_bad(void);    // not used in the final version
 extern int sys_sysreplace(void);
 extern int sys_findkalloc(void);
 

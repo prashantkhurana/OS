@@ -98,7 +98,7 @@ sys_getproc(void)
 
 
 int
-sys_getproc_bad(void)
+sys_getproc_bad(void)   // never used in the final version
 {
   return getproc_bad();
 }
