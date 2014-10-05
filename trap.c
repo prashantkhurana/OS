@@ -32,6 +32,23 @@ idtinit(void)
   lidt(idt, sizeof(idt));
 }
 
+
+void
+register_handler(sighandler_t sighandler)
+{
+char* addr = uva2ka(proc->pgdir, (char*)proc->tf->esp);
+if ((proc->tf->esp & 0xFFF) == 0)
+panic("esp_offset == 0");
+/* open a new frame */
+*(int*)(addr + ((proc->tf->esp - 4) & 0xFFF))
+= proc->tf->eip;
+proc->tf->esp -= 4;
+/* update eip */
+proc->tf->eip = (uint)sighandler;
+}
+
+
+
 //PAGEBREAK: 41
 void
 trap(struct trapframe *tf)

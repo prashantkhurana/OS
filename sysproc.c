@@ -89,3 +89,33 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+int
+sys_signal(void){
+  
+int signum;
+int handlerInt;
+//sighandler_t handler;
+if (argint(0, &signum) < 0)
+return -1;
+if (argint(1, &handlerInt) <0)
+return -1;
+return signal(signum, (sighandler_t) handlerInt);
+}
+
+
+int
+    sys_alarm(void)
+    {
+      int ticks;
+//      void (*handler)();
+
+      if(argint(0, &ticks) < 0)
+        return -1;
+//       if(argptr(1, (char**)&handler, 1) < 0)
+//         return -1;
+      proc->alarm_time = ticks;
+//       proc->alarmhandler = handler;
+      return 0;
+    }

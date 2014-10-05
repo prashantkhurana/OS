@@ -1,3 +1,7 @@
+#ifndef sighandler_t
+typedef void (*sighandler_t)(void);
+#endif
+
 struct stat;
 struct rtcdate;
 
@@ -23,6 +27,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int signal(int, sighandler_t);
+uint alarm(uint microseconds);
 
 // ulib.c
 int stat(char*, struct stat*);

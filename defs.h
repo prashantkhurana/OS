@@ -104,6 +104,10 @@ int             pipewrite(struct pipe*, char*, int);
 
 //PAGEBREAK: 16
 // proc.c
+
+#ifndef sighandler_t
+typedef void (*sighandler_t)(void);
+#endif
 struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
@@ -118,6 +122,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int 		signal(int signum, sighandler_t handler);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

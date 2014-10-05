@@ -69,7 +69,12 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
+  int i;
+  //p->registeredSignals = 0;
+  for (i=0; i< 3; i++)
+  p->signalHandlers[i] = (sighandler_t) -1;
+  p->time_elapsed=0;
+  p->alarm_time=0;
   return p;
 }
 
@@ -157,7 +162,11 @@ fork(void)
   safestrcpy(np->name, proc->name, sizeof(proc->name));
  
   pid = np->pid;
-
+//  np->registeredSignals = proc->registeredSignals;
+  for (i = 0; i< 3; i++)
+  np->signalHandlers[i] = proc->signalHandlers[i];
+  np->time_elapsed=proc->time_elapsed;
+  np->alarm_time=proc->alarm_time;
   // lock to force the compiler to emit the np->state write last.
   acquire(&ptable.lock);
   np->state = RUNNABLE;
@@ -253,6 +262,22 @@ wait(void)
     sleep(proc, &ptable.lock);  //DOC: wait-sleep
   }
 }
+
+
+// void
+// register_handler(sighandler_t sighandler)
+// {
+// char* addr = uva2ka(proc->pgdir, (char*)proc->tf->esp);
+// if ((proc->tf->esp & 0xFFF) == 0)
+// panic("esp_offset == 0");
+// /* open a new frame */
+// *(int*)(addr + ((proc->tf->esp - 4) & 0xFFF))
+// = proc->tf->eip;
+// proc->tf->esp -= 4;
+// /* update eip */
+// proc->tf->eip = (uint)sighandler;
+// }
+
 
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
@@ -462,4 +487,15 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+
+int
+signal(int signum, sighandler_t handler){
+if (signum >= 0 && signum <=2){
+int x=(int)(proc->signalHandlers[signum]);
+proc->signalHandlers[signum] = handler;
+return x;
+}
+else return -1;
 }
