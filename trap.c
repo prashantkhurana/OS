@@ -49,31 +49,41 @@ register_handler(sighandler_t sighandler)
  cprintf("EAX%x\n",proc->tf->eax);
 cprintf("EBX%x\n",proc->tf->ebx);
 cprintf("ECX%x\n",proc->tf->ecx);
-   proc->tf->esp -= 4;  
-*(int *)(((proc->tf->esp)))
- =proc->tf->eax;
-proc->tf->esp -= 4;  
-*(int *)(((proc->tf->esp)))
- =proc->tf->ebx;
- 
- proc->tf->esp -= 4;  
-*(int *)(((proc->tf->esp)))
- =proc->tf->ecx;
 
 proc->tf->esp -= 4;  
-*(int*)(((proc->tf->esp)))
- = proc->tf->eip +0x04 ;
+//  //int (*ptr)(void)= &retsignal;
+// //*(int (**)(void))(((proc->tf->esp)))=&retsignal;
+ *(int*)(((proc->tf->esp)))
+   = proc->tf->eip+0x4; 
+ cprintf("ESP%x\n",proc->tf->esp);
+// 
+//   
+//    proc->tf->esp -= 4;  
+// *(int *)(((proc->tf->esp)))
+//  =proc->tf->eax;
+//  
+//   cprintf("ESP%x\n",proc->tf->esp);
+// 
+// proc->tf->esp -= 4;  
+// *(int *)(((proc->tf->esp)))
+//  =proc->tf->ebx;
+//  cprintf("ESP%x\n",proc->tf->esp);
+//  
+//  proc->tf->esp -= 4;  
+// *(int *)(((proc->tf->esp)))
+//  =proc->tf->ecx;
+// 
+//   cprintf("ESP%x\n",proc->tf->esp);
+
+// proc->tf->esp -= 4;  
+// *(int*)(((proc->tf->esp)))
+//  = proc->tf->eip +0x04 ;
 
  
- proc->tf->esp -= 4;  
- //int (*ptr)(void)= &retsignal;
-//*(int (**)(void))(((proc->tf->esp)))=&retsignal;
-*(int*)(((proc->tf->esp)))
- = proc->tf->eip +0x1;
-
+  
  
  
-cprintf("retsignal%x\n",*(int *)(proc->tf->esp));
+//cprintf("retsignal%x\n",*(int *)(proc->tf->esp));
 
  //cprintf("%x",proc->tf->esp);
 proc->tf->eip = (uint)sighandler;
