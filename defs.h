@@ -123,7 +123,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int 		signal(int signum, sighandler_t handler);
-
+int 		retsignal(void);
 // swtch.S
 void            swtch(struct context**, struct context*);
 

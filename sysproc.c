@@ -119,3 +119,12 @@ int
 //       proc->alarmhandler = handler;
       return 0;
     }
+    
+int
+    sys_retsignal(void)
+    {
+     return retsignal();
+    }
+
+    
+    

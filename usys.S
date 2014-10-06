@@ -31,4 +31,4 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(signal)
 SYSCALL(alarm)
-
+SYSCALL(retsignal)

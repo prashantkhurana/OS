@@ -28,6 +28,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int signal(int, sighandler_t);
+int retsignal(void);
 uint alarm(uint microseconds);
 
 // ulib.c

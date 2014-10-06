@@ -499,3 +499,8 @@ return x;
 }
 else return -1;
 }
+
+int
+retsignal(){
+  return 1;
+}
