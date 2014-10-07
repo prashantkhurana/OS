@@ -116,6 +116,7 @@ int
 //       if(argptr(1, (char**)&handler, 1) < 0)
 //         return -1;
       proc->alarm_time = ticks;
+      proc->time_elapsed=0;
 //       proc->alarmhandler = handler;
       return 0;
     }

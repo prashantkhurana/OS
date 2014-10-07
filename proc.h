@@ -73,6 +73,7 @@ struct proc {
   sighandler_t signalHandlers[2];
   uint alarm_time;
   uint time_elapsed;
+  int signalhex;
 };
 
 // Process memory is laid out contiguously, low addresses first:

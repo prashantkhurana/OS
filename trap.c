@@ -34,58 +34,11 @@ idtinit(void)
 
 
 void
-register_handler(sighandler_t sighandler)
+register_handler_sigsev(sighandler_t sighandler)
 {
-// char* addr = uva2ka(proc->pgdir, (char*)proc->tf->esp);
-// if ((proc->tf->esp & 0xFFF) == 0)
-// panic("esp_offset == 0");
-// /* open a new frame */
-// *(int*)(addr + ((proc->tf->esp - 4) & 0xFFF))
-// = proc->tf->eip;
-// proc->tf->esp -= 4;
-// /* update eip */
-  
- cprintf("ESP%x\n",proc->tf->esp);
- cprintf("EAX%x\n",proc->tf->eax);
-cprintf("EBX%x\n",proc->tf->ebx);
-cprintf("ECX%x\n",proc->tf->ecx);
-
 proc->tf->esp -= 4;  
-//  //int (*ptr)(void)= &retsignal;
-// //*(int (**)(void))(((proc->tf->esp)))=&retsignal;
  *(int*)(((proc->tf->esp)))
-   = proc->tf->eip+0x4; 
- cprintf("ESP%x\n",proc->tf->esp);
-// 
-//   
-//    proc->tf->esp -= 4;  
-// *(int *)(((proc->tf->esp)))
-//  =proc->tf->eax;
-//  
-//   cprintf("ESP%x\n",proc->tf->esp);
-// 
-// proc->tf->esp -= 4;  
-// *(int *)(((proc->tf->esp)))
-//  =proc->tf->ebx;
-//  cprintf("ESP%x\n",proc->tf->esp);
-//  
-//  proc->tf->esp -= 4;  
-// *(int *)(((proc->tf->esp)))
-//  =proc->tf->ecx;
-// 
-//   cprintf("ESP%x\n",proc->tf->esp);
-
-// proc->tf->esp -= 4;  
-// *(int*)(((proc->tf->esp)))
-//  = proc->tf->eip +0x04 ;
-
- 
-  
- 
- 
-//cprintf("retsignal%x\n",*(int *)(proc->tf->esp));
-
- //cprintf("%x",proc->tf->esp);
+   = proc->tf->eip+0x7; 
 proc->tf->eip = (uint)sighandler;
 }
 
@@ -104,9 +57,12 @@ trap(struct trapframe *tf)
       exit();
     return;
   }
-  if(tf->trapno == T_DIVIDE){
-    register_handler(proc->signalHandlers[0]);
+  if(tf->trapno == T_PGFLT){
+    if(proc->signalHandlers[0]!=(sighandler_t) -1)
+    {
+    register_handler_sigsev(proc->signalHandlers[0]);
     return;
+    }
   }
   
   switch(tf->trapno){
@@ -114,6 +70,7 @@ trap(struct trapframe *tf)
     if(cpu->id == 0){
       acquire(&tickslock);
       ticks++;
+      alarm_process();
       wakeup(&ticks);
       release(&tickslock);
     }
