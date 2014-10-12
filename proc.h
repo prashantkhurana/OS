@@ -51,9 +51,9 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-#ifndef sighandler_t
-typedef void (*sighandler_t)(void);
-#endif
+// #ifndef sighandler_t
+// typedef void (*sighandler_t)(void);
+// #endif
 
 // Per-process state
 struct proc {
@@ -70,7 +70,8 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  sighandler_t signalHandlers[3];
+  void (*signalHandlers[4]) (void);
+  //void signalHandlers[3];
   uint alarm_time;
   uint time_elapsed;
   int signalhex;
