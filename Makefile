@@ -173,8 +173,8 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_sigsev_test\
-	_alarm_test\
+	_test_alarm\
+	_test_sigsegv\
 	
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

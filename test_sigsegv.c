@@ -3,7 +3,7 @@
 #include "user.h"
 
 void periodic();
-void test_sigsegv();
+void wrapper(int (*pfi)());
 int *y;
 int z=10;
 
@@ -11,21 +11,23 @@ int
 main(int argc, char *argv[])
 {
   printf(1, "sigsev test starting\n");
-  signal(0, test_sigsegv);
-   y=(int *)0x890c458b;
-  (*y)++;
-  (*y)++;
-  printf(1,"Back from the fault. The new value of the *y after adding 1 is %d\n",*y);
-  printf(1,"Test complete");
+  signal(2, (void (*)(void))wrapper);
+ //signal(2, (void (*)(void))test_periodic);
+  signal(0,periodic); 
+  y=(int *)0x890c458b;
+  z=(*y);
+//   (*y)++;
+  printf(1,"Back from the fault.\n");
+  printf(1,"Test complete\n");
   exit();
 }
 
-void test_sigsegv()
+void wrapper(int (*pfi)())
 {
-   asm("push %%eax;push %%ecx; push %%edx" :);
-   periodic();
-   asm("movl (%%esp), %%edx; movl 0x4(%%esp),%%ecx; movl 0x4(%%esp),%%eax" :);
-  return;
+    asm("push %%eax;push %%edx; push %%ecx;" :);
+    pfi();
+    asm(" movl 0x4(%%ebp), %%eax ;movl (%%ebp), %%ecx; addl $0x2, %%eax;  movl %%eax, 0x8(%%ebp) ;movl %%ecx, 0x4(%%ebp);movl %%ebp, %%ecx; addl $0x4, %%ecx; movl %%ecx, %%ebp;    movl (%%esp), %%ecx; movl 0x4(%%esp),%%edx; movl 0x8(%%esp),%%eax; " :);
+    return;
 }
 
 void 
@@ -33,6 +35,6 @@ periodic()
 {
   y=&z;
 printf(1, "Faulty Memory Access: In Sigsev Test Handler\n");
-printf(1, "Setting value of *y to be 10 \n");
+//printf(1, "Setting value of *y to be 10 \n");
   return;
 }

@@ -265,14 +265,19 @@ wait(void)
   }
 }
 
-void
-register_handler(sighandler_t sighandler)
-{
-proc->tf->esp -= 4;  
- *(int*)(((proc->tf->esp)))
-   = proc->tf->eip; 
-proc->tf->eip = (uint)sighandler;
-}
+// void
+// register_handler(sighandler_t sighandler, sighandler_t sighandler2)
+// {
+// proc->tf->esp -= 4;  
+//  *(int*)(((proc->tf->esp)))
+//     = (uint)sighandler;
+// 
+// proc->tf->esp -= 4;  
+//  *(int*)(((proc->tf->esp)))
+//     = proc->tf->eip;
+// 
+// proc->tf->eip = (uint)sighandler2;
+// }	
 
 
 void
@@ -298,20 +303,20 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
-      if(p->signalhex==1)
-      {
-	if(proc->signalHandlers[1]!=(sighandler_t) -1)
-      {
-      register_handler(p->signalHandlers[1]);
-      }
-      else
-      {
-	release(&ptable.lock);
-	kill(proc->pid);
-	acquire(&ptable.lock);
-      }
-      }
-      p->signalhex=0;
+//       if(p->signalhex==1)
+//       {
+// 	if(proc->signalHandlers[1]!=(sighandler_t) -1)
+//       {
+//       register_handler(p->signalHandlers[1],p->signalHandlers[2]);
+//       }
+//       else
+//       {
+// 	release(&ptable.lock);
+// 	kill(proc->pid);
+// 	acquire(&ptable.lock);
+//       }
+//       }
+//       p->signalhex=0;
       switchkvm();
 
       // Process is done running for now.

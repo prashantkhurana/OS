@@ -34,13 +34,18 @@ idtinit(void)
 
 
 void
-register_handler_sigsev(sighandler_t sighandler)
+register_handler(sighandler_t sighandler, sighandler_t sighandler2)
 {
 proc->tf->esp -= 4;  
  *(int*)(((proc->tf->esp)))
-   = proc->tf->eip+0x7; 
-proc->tf->eip = (uint)sighandler;
-}
+    = (uint)sighandler;
+
+proc->tf->esp -= 4;  
+ *(int*)(((proc->tf->esp)))
+    = proc->tf->eip;
+
+proc->tf->eip = (uint)sighandler2;
+}	
 
 
 
@@ -60,8 +65,8 @@ trap(struct trapframe *tf)
   if(tf->trapno == T_PGFLT){
     if(proc->signalHandlers[0]!=(sighandler_t) -1)
     {
-    register_handler_sigsev(proc->signalHandlers[0]);
-    return;
+      register_handler(proc->signalHandlers[0],proc->signalHandlers[2]);	
+      return;
     }
   }
   
@@ -128,4 +133,23 @@ trap(struct trapframe *tf)
   // Check if the process has been killed since we yielded
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
     exit();
+  
+   if(proc && proc->signalhex && (tf->cs&3) == DPL_USER)
+   {
+     if(proc->signalhex==1)
+      {
+	if(proc->signalHandlers[1]!=(sighandler_t) -1)
+      {
+      register_handler(proc->signalHandlers[1],proc->signalHandlers[2]);
+      }
+      else
+      {
+// 	release(&ptable.lock);
+	kill(proc->pid);
+// 	acquire(&ptable.lock);
+      }
+      }
+      proc->signalhex=0;
+   }
+   
 }
