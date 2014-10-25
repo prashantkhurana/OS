@@ -232,7 +232,9 @@ wait(void)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        freevm(p->pgdir);
+	if(p->pgdir != proc->pgdir)
+	freevm(p->pgdir);
+        //freevm(p->pgdir);
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;
@@ -463,3 +465,77 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+int
+clone(void *stack)
+{
+int i, pid;
+struct proc *np;
+// Allocate process.
+if((np = allocproc()) == 0)
+return -1;
+np->pgdir = proc->pgdir;
+np->sz = proc->sz;
+np->parent = proc;
+*np->tf = *proc->tf;
+// Clear %eax so that fork returns 0 in the child.
+np->tf->eax = 0;
+//calculate stack size(from function arg #n to esp)
+uint stackSize = *(uint *)proc->tf->ebp - proc->tf->esp;
+//uint stackSize = proc->tf->ebp - proc->tf->esp;
+//move stack pointer to bottom of trapframe
+np->tf->esp = (uint)stack+4096 - stackSize;
+//calculate size needed above ebp
+uint topSize = *(uint *)proc->tf->ebp - proc->tf->ebp;
+//move base pointer below topsize
+np->tf->ebp = (uint)stack+4096 - topSize;
+//copy parent processee's stack to child
+memmove((void *)(np->tf->esp),(const void *)(proc->tf->esp), stackSize);
+for(i = 0; i < NOFILE; i++)
+if(proc->ofile[i])
+np->ofile[i] = filedup(proc->ofile[i]);
+np->cwd = idup(proc->cwd);
+pid = np->pid;
+np->state = RUNNABLE;
+safestrcpy(np->name, proc->name, sizeof(proc->name));
+return pid;
+}
+
+
+
+
+// int
+// join(void *stack)
+// {
+// int i, pid;
+// struct proc *np;
+// // Allocate process.
+// if((np = allocproc()) == 0)
+// return -1;
+// np->pgdir = proc->pgdir;
+// np->sz = proc->sz;
+// np->parent = proc;
+// *np->tf = *proc->tf;
+// // Clear %eax so that fork returns 0 in the child.
+// np->tf->eax = 0;
+// //calculate stack size(from function arg #n to esp)
+// uint stackSize = *(uint *)proc->tf->ebp - proc->tf->esp;
+// //uint stackSize = proc->tf->ebp - proc->tf->esp;
+// //move stack pointer to bottom of trapframe
+// np->tf->esp = (uint)stack+4096 - stackSize;
+// //calculate size needed above ebp
+// uint topSize = *(uint *)proc->tf->ebp - proc->tf->ebp;
+// //move base pointer below topsize
+// np->tf->ebp = (uint)stack+size - topSize;
+// //copy parent processee's stack to child
+// memmove((void *)(np->tf->esp),(const void *)(proc->tf->esp), stackSize);
+// for(i = 0; i < NOFILE; i++)
+// if(proc->ofile[i])
+// np->ofile[i] = filedup(proc->ofile[i]);
+// np->cwd = idup(proc->cwd);
+// pid = np->pid;
+// np->state = RUNNABLE;
+// safestrcpy(np->name, proc->name, sizeof(proc->name));
+// return pid;
+// }
