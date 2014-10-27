@@ -100,3 +100,50 @@ if ( argptr(0,(char **) &stack,4096) < 0)
 return -1;
 return clone(stack);
 }
+
+
+
+int
+sys_join(void) {
+void *stack;
+//int *p;
+//int size;
+if ( argptr(0,(char **) &stack,10) < 0)
+return -1;
+return wait2(stack);
+}
+
+
+int sys_mutex_init(void)
+{
+  return mutex_init();
+}
+int sys_mutex_trylock(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return mutex_trylock(n);
+}
+int sys_mutex_lock(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return mutex_lock(n);
+}
+
+int sys_mutex_unlock(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return mutex_unlock(n);
+}
+int sys_mutex_destroy(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return mutex_destroy(n);
+}

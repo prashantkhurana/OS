@@ -25,31 +25,82 @@
 // If allocproc fails, returns -1
 
 // //#include "user.h"
-#include "pthread.h"
+//#include "pthread1.h"
 #include "types.h"
-#include "mmu.h"
-#include "stat.h"
+//#include "mmu.h"
+//#include "stat.h"
 #include "user.h"
-#include "param.h"
-#include "fs.h"
-#include "proc.h"
-#include "x86.h"
+#include "pthread.h"
+//#include "param.h"
+//#include "fs.h"
+//#include "proc.h"
+//#include "x86.h"
+
+
+int pthread_join(pthread_t thread, void **value_ptr)
+{
+ // printf(1,"in join");
+return join(value_ptr);  
+}
+
 
 int pthread_create(pthread_t *thread, const void *attr,
-                          void *(*start_routine) (void *), void *arg)
+                          void (*func)(void*), void *arg)
 {
   void *stack = malloc(4096);  
   int rc = clone(stack);
   if (rc == 0)
   {
-    printf(1,"thread created");
-   // (*start_routine)(arg);
+//    printf(1,"thread created befores :");
+   (*func)(arg);
+//   printf(1,"thread created after:");
+   return 1;
     //free(stack);
-    exit();
+    //exit();
   }
   else
     return rc;
 }
+
+int pthread_mutex_init(pthread_mutex_t *mutex,const void *attr)
+{
+  int x=mutex_init();
+  mutex->id=x;
+  return x;
+}
+
+int pthread_mutex_lock(pthread_mutex_t *mutex)
+{
+  return  mutex_lock(mutex->id);
+  //return 0;
+}
+int pthread_mutex_unlock(pthread_mutex_t *mutex)
+{
+  //if(mutex_tlock(mutex->id)==0)
+   // return 0;
+  //else
+    return  mutex_unlock(mutex->id);
+  //return 0;
+}
+
+int pthread_mutex_destory(pthread_mutex_t *mutex)
+{
+  return  mutex_destroy(mutex->id);
+  //return 0;
+}
+
+
+void pthread_mutex_yield()
+{
+  sleep(5);
+}
+
+
+int pthread_mutex_exit()
+{
+  return exit();
+}
+
 
 // Initializes a spinlock
 // void

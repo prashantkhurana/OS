@@ -1,6 +1,5 @@
 struct stat;
 struct rtcdate;
-//struct pthread_t;
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -24,6 +23,14 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int clone(void *);
+int join(void **);
+int mutex_init(void);
+int mutex_trylock(int md);
+int mutex_lock(int md);
+int mutex_unlock(int md);
+int mutex_destroy(int md);
+
+
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -41,3 +48,4 @@ int atoi(const char*);
 
 
 //thread.c
+ 

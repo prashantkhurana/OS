@@ -1,6 +1,6 @@
 // Segments in proc->gdt.
 #define NSEGS     7
-
+#define mutex_table_size 100
 // Per-CPU state
 struct cpu {
   uchar id;                    // Local APIC ID; index into cpus[] below
@@ -49,7 +49,13 @@ struct context {
   uint eip;
 };
 
-enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+struct mutex_table {
+  uint m[mutex_table_size];
+  int used[mutex_table_size];
+};
+
+
+enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE};
 
 // Per-process state
 struct proc {
@@ -66,6 +72,10 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int threads_to_kill;
+  struct proc *ac_parent; 
+  int thread;
+  struct mutex_table *mutex_table;                // Page table
 };
 
 // Process memory is laid out contiguously, low addresses first:

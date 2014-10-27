@@ -82,117 +82,179 @@
 
 
 
-
-#include <pthread.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include "types.h"
+#include "user.h"
+#include "pthread.h"
+// #include <stdio.h>
+//#include <unistd.h>
+//#include <stdlib.h>
 
 
 
 int ARRAYSIZE;
 
 
-// struct sort_this
-// {
-// int (*a);
-// pthread_mutex_t (*mut);
-// };
-// typedef struct sort_this sort_this;
-// sort_this *array;
+struct sort_this
+{
+int (*a);
+int sort;
+pthread_mutex_t (*mut);
+};
+typedef struct sort_this sort_this;
+sort_this *array;
 pthread_t *thread;
-void *check_sort()
+void check_sort()
 {
-// 	int i;
-// 	int x=1;
-// 	while(x)
-// 	{
-// 		
-// 	for(i=0;i<ARRAYSIZE;i++)
-// 	{
-// 	  printf("%d",array->a[i]);
-// 	}
-// 		  printf("\n");
-// 		  x=0;
-// 	for(i=0;i<ARRAYSIZE;i++)
-// 	{
-// 		if(array->a[i]>array->a[i+1])
-// 		{
-// 			x=1;
-// 			usleep (2000000);
-// 		}
-// 	}
-// }
-// 	
-// 	for(i=0;i<ARRAYSIZE;i++)
-// 	{
-// 	  pthread_cancel(thread[i]);
-// 	}
-  while(1)
-  {printf("y");
-  }
+	int i;
+	int x=1;
+	while(x)
+	{
+	  printf(1,"Current Array(mid way sorting)");
+	for(i=0;i<ARRAYSIZE;i++)
+	{
+	  printf(1,"%d",array->a[i]);
+	}
+		  printf(1,"\n");
+  	
+	
+	x=0;
+	for(i=0;i<ARRAYSIZE-1;i++)
+	{
+		if(array->a[i]>array->a[i+1])
+		{
+			x=1;
+			sleep (20);
+		}
+	}
 }
 
-
-void *sort (void *x)
-{
-// 	int *y=(int*)x;
-// 	int i=*y;
-// 	int j;
-// 	while(1)
-// 	 {
-// 		pthread_mutex_lock(&array->mut[i]);
-// 		pthread_mutex_lock (&array->mut[i+1]);
-// 		if(array->a[i]>array->a[i+1])
-// 		{
-// 			int temp=array->a[i];
-// 			array->a[i]=array->a[i+1];
-// 			array->a[i+1]=temp;
-// 		}
-// 		pthread_mutex_unlock (&array->mut[i]);
-// 		pthread_mutex_unlock (&array->mut[i+1]);
-// 		
-// 	}
-  while(1)
+  array->sort=0;
+  x=10;
+  while(x>0)
   {
-    printf("x");
+    //printf(1,"djdjd");
+    x--;
   }
+  printf(1,"After sorting");
+  for(i=0;i<ARRAYSIZE;i++)
+	{
+	  printf(1,"%d",array->a[i]);
+	}
+
+  exit();
+//  return (void*)1;
 }
 
-// sort_this  *arrayInit (void)
-// {
-// 	struct sort_this *array;
-// 	array=(struct sort_this *)malloc(sizeof(struct sort_this));
-// 	array->a=(int *)malloc(ARRAYSIZE*sizeof(int));
-// 	array->mut=(pthread_mutex_t *)malloc(ARRAYSIZE*sizeof(pthread_mutex_t));
-// 	int i;
+
+void sort (void *x)
+{
+  
+// 	pthread_mutex_lock(&array->mut[0]);
+// 	  printf(1,"locked");
+// 	int m=100000;
+// 	
+// 	while(m>0)
+// 		{
+// 		//  printf(1,"%d",m);
+// 		  m--;
+// 		}
+// 	//printf(1,"\n");
+// 	pthread_mutex_unlock (&array->mut[0]);
+// 	printf(1,"unlocked");
+// 	exit();
+		
+	int *y=(int*)x;
+	int i=*y;
+	//int j;
+	while(array->sort)
+	 {
+			//printf(1,"currently running %d \n", i);
+
+		pthread_mutex_lock(&array->mut[i]);
+		pthread_mutex_lock (&array->mut[i+1]);
+		if(array->a[i]>array->a[i+1])
+		{
+			int temp=array->a[i];
+			array->a[i]=array->a[i+1];
+			array->a[i+1]=temp;
+		}
+		pthread_mutex_unlock (&array->mut[i]);
+		pthread_mutex_unlock (&array->mut[i+1]);
+		
+	}
+  int c=10;
+  while(c>0)
+  {
+   // printf(1,"x");
+    c--;
+  }
+  exit();
+}
+
+ sort_this  *arrayInit (void)
+ {
+ 	struct sort_this *array;
+ 	array=(struct sort_this *)malloc(sizeof(struct sort_this));
+ 	array->a=(int *)malloc(ARRAYSIZE*sizeof(int));
+ 	array->mut=(pthread_mutex_t *)malloc(ARRAYSIZE*sizeof(pthread_mutex_t));
+	array->sort=1;
+ 	int i;
+ 	for(i=0;i<ARRAYSIZE;i++)
+ 	{
+	  array->a[i]=ARRAYSIZE-i-1;
+	}
+	for(i=0;i<ARRAYSIZE;i++)
+	{
+		pthread_mutex_init (&array->mut[i], 0);
+	}  
 // 	for(i=0;i<ARRAYSIZE;i++)
 // 	{
-// 	  array->a[i]=ARRAYSIZE-i-1;
+// 		printf(1,"%d ",array->mut[i].id);
+// 		  //printf(1,"%d ",array->mut[i].);
 // 	}
-// 	for(i=0;i<ARRAYSIZE;i++)
-// 	{
-// 		pthread_mutex_init (&array->mut[i], NULL);
-// 	}  
-// 	return array;
-// }
+	return array;
+}
 int main ( int argc, char *argv[] )
 {
 //	int v;
 	ARRAYSIZE=atoi(argv[1])+1;
 	pthread_t dummy[ARRAYSIZE];
+	//pthread_t dummy[2];
 	thread=dummy;
  	int b[ARRAYSIZE];
- 	//sort_this *array2;
- 	//array2=arrayInit();
- 	//array=array2;
+	//ARRAYSIZE=2;
+ 	sort_this *array2;
+ 	array2=arrayInit();
+ 	array=array2;
  	int i;
-	for(i=0;i<ARRAYSIZE-1;i++)
-	{
-		b[i]=i;
-	  pthread_create (&thread[i], NULL,sort, &b[i]);
-	}
-	pthread_create (&thread[i], NULL,check_sort, NULL);
-	//pthread_join (thread[ARRAYSIZE-1], NULL);
-	return 0;
+	//uint x=100000000;
+ 	for(i=0;i<ARRAYSIZE-1;i++)
+ 	{
+ 		b[i]=i;
+		pthread_create (&thread[i], 0,sort, &b[i]);
+	//	while(x>0)
+	//	{
+	//	  x--;
+	//	}
+ 	}
+ 	
+	pthread_create (&thread[i], 0,check_sort, 0);
+	//int x=10000;
+	//while(x>0)
+	 // x--;
+	//usleep(10000);
+	void *stack;
+	for(i=0;i<ARRAYSIZE;i++)
+ 	{
+ 		pthread_join (thread[ARRAYSIZE-i], &stack);
+ 	}
+//  	pthread_join (thread[ARRAYSIZE-0], 0);
+// 	pthread_join (thread[ARRAYSIZE-1], 0);
+// 	pthread_join (thread[ARRAYSIZE-2], 0);
+// 	pthread_join (thread[ARRAYSIZE-3], 0);
+// 	pthread_join (thread[ARRAYSIZE-4], 0);
+// 	pthread_join (thread[ARRAYSIZE-5], 0);
+	//pthread_join (thread[ARRAYSIZE-1], 0);
+//	printf(1,"done waiting");
+	exit();
 }

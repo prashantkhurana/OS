@@ -119,6 +119,13 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int		clone(void *);
+int 		wait2(void *);
+int mutex_init(void);
+int mutex_trylock(int md);
+int mutex_lock(int md);
+int mutex_unlock(int md);
+int mutex_destroy(int md);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 
@@ -139,7 +146,7 @@ char*           safestrcpy(char*, const char*, int);
 int             strlen(const char*);
 int             strncmp(const char*, const char*, uint);
 char*           strncpy(char*, const char*, int);
-
+void*           malloc(uint);
 // syscall.c
 int             argint(int, int*);
 int             argptr(int, char**, int);
