@@ -26,11 +26,7 @@ pinit(void)
   initlock(&ptable.lock, "ptable");
 }
 
-//PAGEBREAK: 32
-// Look in the process table for an UNUSED proc.
-// If found, change state to EMBRYO and initialize
-// state required to run in the kernel.
-// Otherwise return 0.
+
 static struct proc*
 allocproc(void)
 {
@@ -60,8 +56,6 @@ found:
   sp -= sizeof *p->tf;
   p->tf = (struct trapframe*)sp;
   
-  // Set up new context to start executing at forkret,
-  // which returns to trapret.
   sp -= 4;
   *(uint*)sp = (uint)trapret;
 
@@ -75,10 +69,7 @@ found:
     p->mutex_table->m[i]=0;
     p->mutex_table->used[i]=0;
   }
-  //memset(p->mutex_table->m, 0, sizeof p->mutex_table->m);
-  //memset(p->mutex_table->used, 0, sizeof p->mutex_table->used);
   p->context->eip = (uint)forkret;
-  //p->mutex_table=(int *)kalloc();
   return p;
 }
 
@@ -144,7 +135,6 @@ fork(void)
   if((np = allocproc()) == 0)
     return -1;
 
-  // Copy process state from p.
   if((np->pgdir = copyuvm(proc->pgdir, proc->sz)) == 0){
     kfree(np->kstack);
     np->kstack = 0;
@@ -155,7 +145,6 @@ fork(void)
   np->parent = proc;
   *np->tf = *proc->tf;
   
-  // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
   np->threads_to_kill=0;
   np->thread=0;
@@ -176,134 +165,6 @@ fork(void)
   
   return pid;
 }
-
-// Exit the current process.  Does not return.
-// An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
-// void
-// exit(void)
-// {
-//   struct proc *p;
-//   int fd;
-// 
-//   if(proc == initproc)
-//     panic("init exiting");
-// 
-//   // Close all open files.
-//   for(fd = 0; fd < NOFILE; fd++){
-//     if(proc->ofile[fd]){
-//       fileclose(proc->ofile[fd]);
-//       proc->ofile[fd] = 0;
-//     }
-//   }
-// 
-//   begin_op();
-//   iput(proc->cwd);
-//   end_op();
-//   proc->cwd = 0;
-// 
-//   acquire(&ptable.lock);
-// 
-//   // Parent might be sleeping in wait().
-//   wakeup1(proc->parent);
-// 
-//   // Pass abandoned children to init.
-//   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-//     if(p->parent == proc && proc->pgdir!=p->pgdir){
-//       p->parent = initproc;
-//       if(p->state == ZOMBIE)
-//         wakeup1(initproc);
-//     }
-//     if(p->parent == proc && proc->pgdir==p->pgdir){
-//       p->parent = initproc;
-//       proc->threads_to_kill++;
-//       if(p->state == ZOMBIE)
-//         wakeup1(initproc);
-//       else
-//       {
-// 	p->killed=1;
-// 	if(p->state == SLEEPING)
-//         p->state = RUNNABLE;
-//       }
-//     }
-//   }
-// 
-//   // Jump into the scheduler, never to return.
-//   if(proc->threads_to_kill>0)
-//     proc->state=ZOMBIE2;
-//   else
-//   proc->state = ZOMBIE;
-//   sched();
-//   panic("zombie exit");
-// }
-
-
-
-
-
-
-
-
-
-
-
-// Wait for a child process to exit and return its pid.
-// Return -1 if this process has no children.
-// int
-// wait(void)
-// {
-//   struct proc *p,*p2;
-//   int havekids, pid;
-//   cprintf("pid of waiting process and name is %d %s\n",proc->pid,proc->name);
-//   acquire(&ptable.lock);
-//   for(;;){
-//     // Scan through table looking for zombie children.
-//     havekids = 0;
-//     //printf("the id of the process is ", proc->pid);
-//     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-//       if(p->parent != proc)
-//         continue;
-//       havekids = 1;
-//       if(p->state == ZOMBIE){
-//         // Found one.
-//         pid = p->pid;
-//         kfree(p->kstack);
-//         p->kstack = 0;
-// 	if(p->thread!=1)
-// 	freevm(p->pgdir);
-// 	else
-// 	{
-// 	  p2=p->ac_parent;
-// 	  p2->threads_to_kill--;
-// 	}
-//         //freevm(p->pgdir);
-//         p->state = UNUSED;
-//         p->pid = 0;
-//         p->parent = 0;
-//         p->name[0] = 0;
-//         p->killed = 0;
-//         release(&ptable.lock);
-//         return pid;
-//       }
-//      else if(p->state==ZOMBIE2)
-//      {
-//        if(p->threads_to_kill==0)
-// 	 p->state=ZOMBIE;
-//      }
-//      
-//     }
-// 
-//     // No point waiting if we don't have any children.
-//     if(!havekids || proc->killed){
-//       release(&ptable.lock);
-//       return -1;
-//     }
-// 
-//     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
-//     sleep(proc, &ptable.lock);  //DOC: wait-sleep
-//   }
-// }
-
 
 
 
@@ -674,35 +535,6 @@ wakeup(void *chan)
 
 
 
-// static void
-// wakeup21(void *chan)
-// {
-//   struct proc *p;
-//   //
-//   
-//   
-//   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-//     if(p->state == SLEEPING && p->chan == chan)
-//     {
-//       //cprintf("waking up pid:%d   ",proc->pid); 
-//       p->state = RUNNABLE;
-//       
-//     }
-// }
-// 
-// // Wake up all processes sleeping on chan.
-// void
-// wakeup2(void *chan)
-// {
-//   //int *y=(int *)chan;
-//   //cprintf("her %d",*y);
-//   acquire(&ptable.lock);
-//   wakeup21(chan);
-//   release(&ptable.lock);
-// }
-
-
-
 
 
 
@@ -797,18 +629,11 @@ np->threads_to_kill=0;
 np->thread=1;
 np->ac_parent=proc;
 *np->tf = *proc->tf;
-// Clear %eax so that fork returns 0 in the child.
 np->tf->eax = 0;
-//calculate stack size(from function arg #n to esp)
 uint stackSize = *(uint *)proc->tf->ebp - proc->tf->esp;
-//uint stackSize = proc->tf->ebp - proc->tf->esp;
-//move stack pointer to bottom of trapframe
 np->tf->esp = (uint)stack+4096 - stackSize;
-//calculate size needed above ebp
 uint topSize = *(uint *)proc->tf->ebp - proc->tf->ebp;
-//move base pointer below topsize
 np->tf->ebp = (uint)stack+4096 - topSize;
-//copy parent processee's stack to child
 memmove((void *)(np->tf->esp),(const void *)(proc->tf->esp), stackSize);
 for(i = 0; i < NOFILE; i++)
 if(proc->ofile[i])
