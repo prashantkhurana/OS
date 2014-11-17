@@ -69,7 +69,13 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
+  int i;
+  //p->registeredSignals = 0;
+  for (i=0; i< 3; i++)
+  p->signalHandlers[i] = (sighandler_t) -1;
+  p->time_elapsed=0;
+  p->alarm_time=0;
+  p->signalhex=0;
   return p;
 }
 
@@ -157,7 +163,12 @@ fork(void)
   safestrcpy(np->name, proc->name, sizeof(proc->name));
  
   pid = np->pid;
-
+//  np->registeredSignals = proc->registeredSignals;
+  for (i = 0; i< 3; i++)
+  np->signalHandlers[i] = proc->signalHandlers[i];
+  np->time_elapsed=proc->time_elapsed;
+  np->alarm_time=proc->alarm_time;
+  np->signalhex=proc->signalhex;
   // lock to force the compiler to emit the np->state write last.
   acquire(&ptable.lock);
   np->state = RUNNABLE;
@@ -254,14 +265,21 @@ wait(void)
   }
 }
 
-//PAGEBREAK: 42
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
-// Scheduler never returns.  It loops, doing:
-//  - choose a process to run
-//  - swtch to start running that process
-//  - eventually that process transfers control
-//      via swtch back to the scheduler.
+// void
+// register_handler(sighandler_t sighandler, sighandler_t sighandler2)
+// {
+// proc->tf->esp -= 4;  
+//  *(int*)(((proc->tf->esp)))
+//     = (uint)sighandler;
+// 
+// proc->tf->esp -= 4;  
+//  *(int*)(((proc->tf->esp)))
+//     = proc->tf->eip;
+// 
+// proc->tf->eip = (uint)sighandler2;
+// }	
+
+
 void
 scheduler(void)
 {
@@ -281,9 +299,24 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       proc = p;
+      
       switchuvm(p);
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
+//       if(p->signalhex==1)
+//       {
+// 	if(proc->signalHandlers[1]!=(sighandler_t) -1)
+//       {
+//       register_handler(p->signalHandlers[1],p->signalHandlers[2]);
+//       }
+//       else
+//       {
+// 	release(&ptable.lock);
+// 	kill(proc->pid);
+// 	acquire(&ptable.lock);
+//       }
+//       }
+//       p->signalhex=0;
       switchkvm();
 
       // Process is done running for now.
@@ -462,4 +495,44 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+
+int
+signal(int signum, sighandler_t handler){
+if (signum >= 0 && signum <=2){
+int x=(int)(proc->signalHandlers[signum]);
+proc->signalHandlers[signum] = handler;
+return x;
+}
+else return -1;
+}
+
+int
+retsignal(){
+  return 1;
+}
+
+
+int alarm_process()
+{
+  struct proc *p;
+  acquire(&ptable.lock);
+	//argint(0,&px);
+	//char *p4=(char *)px;
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+	{ 
+		if(p->alarm_time>0 && p->time_elapsed!=p->alarm_time)
+		{
+			p->time_elapsed++;
+			if(p->time_elapsed==p->alarm_time)
+			{
+			  p->signalhex=1;
+			  p->alarm_time=0;
+			}
+		}
+	}
+  
+  	release(&ptable.lock);
+	return 1;
 }

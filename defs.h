@@ -104,6 +104,10 @@ int             pipewrite(struct pipe*, char*, int);
 
 //PAGEBREAK: 16
 // proc.c
+
+#ifndef sighandler_t
+typedef void (*sighandler_t)(void);
+#endif
 struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
@@ -118,7 +122,10 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-
+int 		signal(int signum, sighandler_t handler);
+int 		retsignal(void);
+int 		alarm_process(void);
+void            register_handler(sighandler_t sighandler1,sighandler_t sighandler2);
 // swtch.S
 void            swtch(struct context**, struct context*);
 
@@ -178,6 +185,8 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+int 		mprotect(void *addr, int len, int prot);
+
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

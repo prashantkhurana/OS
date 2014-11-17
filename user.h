@@ -1,5 +1,14 @@
+#ifndef sighandler_t
+typedef void (*sighandler_t)(void);
+#endif
+
 struct stat;
 struct rtcdate;
+
+#define PROT_NONE 0
+#define PROT_READ 1
+#define PROT_WRITE 2
+
 
 // system calls
 int fork(void);
@@ -23,6 +32,11 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int signal(int, sighandler_t);
+int retsignal(void);
+uint alarm(uint microseconds);
+int mpro(void *addr, int len, int prot);
+
 
 // ulib.c
 int stat(char*, struct stat*);

@@ -384,3 +384,57 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
+
+int mprotect(void *addr, int len, int prot)
+{
+  //return 1;
+  cprintf("PID :%d", proc->pid);
+  //return 1;
+ pte_t *pte;
+ //char *a, *last;
+
+//  pte = walkpgdir(proc->pgdir, addr, 0);
+ // a = (char*)PGROUNDDOWN((uint)addr);
+ // last = (char*)PGROUNDDOWN(((uint)addr) + len - 1);
+ 
+ if(((int) addr % PGSIZE) != 0){
+return -1;
+}
+int i;
+for (i = (int)addr; i < ((int) addr + (len)) ; i += PGSIZE){
+  pte = walkpgdir(proc->pgdir,(void *)i , 0);
+    if(prot==0)
+    {
+      if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
+      {
+	*pte = *pte & (~PTE_U) ;
+      }
+      else
+	return -1;
+    }
+    if(prot==1)
+    {
+      if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
+      {
+	*pte = *pte & (~PTE_W) ;
+      }
+      else
+	return -1;
+    }
+    if(prot==2)
+    {
+      if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
+      {
+	*pte = *pte | (PTE_W) ;
+      }
+      else
+	return -1;
+    }
+    
+//     if(a == last)
+//       break;
+    //addr += PGSIZE;
+  }
+  lcr3(v2p(proc->pgdir));   // switch to the kernel page table
+  return 1;
+}
