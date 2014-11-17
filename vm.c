@@ -407,7 +407,7 @@ for (i = (int)addr; i < ((int) addr + (len)) ; i += PGSIZE){
     {
       if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
       {
-	*pte = *pte & (~PTE_U) ;
+	*pte = *pte & (~PTE_U);
       }
       else
 	return -1;
@@ -416,7 +416,7 @@ for (i = (int)addr; i < ((int) addr + (len)) ; i += PGSIZE){
     {
       if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
       {
-	*pte = *pte & (~PTE_W) ;
+	*pte = *pte & ((~PTE_W) | (PTE_U)) ;
       }
       else
 	return -1;
@@ -425,7 +425,7 @@ for (i = (int)addr; i < ((int) addr + (len)) ; i += PGSIZE){
     {
       if( ((*pte & PTE_U) != 0) && ((*pte & PTE_P) != 0) )
       {
-	*pte = *pte | (PTE_W) ;
+	*pte = *pte | (PTE_W) | (PTE_U);
       }
       else
 	return -1;
