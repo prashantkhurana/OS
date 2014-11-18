@@ -122,6 +122,26 @@ growproc(int n)
   return 0;
 }
 
+
+
+int
+dgrowproc(int n)
+{
+  uint sz;
+  
+  sz = proc->sz;
+  if(n > 0){
+    if((sz = dallocuvm(proc->pgdir, sz, sz + n)) == 0)
+      return -1;
+  } else if(n < 0){
+    if((sz = deallocuvm(proc->pgdir, sz, sz + n)) == 0)
+      return -1;
+  }
+  proc->sz = sz;
+  switchuvm(proc);
+  return 0;
+}
+
 // Create a new process copying p as the parent.
 // Sets up stack to return as if from system call.
 // Caller must set state of returned proc to RUNNABLE.

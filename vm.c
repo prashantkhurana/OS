@@ -89,6 +89,29 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   return 0;
 }
 
+
+static int
+dmappages(pde_t *pgdir, void *va, uint size, int perm)
+{
+  char *a, *last;
+  pte_t *pte;
+  
+  a = (char*)PGROUNDDOWN((uint)va);
+  last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+  for(;;){
+    if((pte = walkpgdir(pgdir, a, 1)) == 0)
+      return -1;
+    if(*pte & PTE_P)
+      panic("remap");
+    *pte = 0x00000 | perm | ~PTE_P;
+    if(a == last)
+      break;
+    a += PGSIZE;
+    //pa += PGSIZE;
+  }
+  return 0;
+}
+
 // There is one page table per process, plus one that's used when
 // a CPU is not running any process (kpgdir). The kernel uses the
 // current process's page table during system calls and interrupts;
@@ -238,6 +261,35 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     }
     memset(mem, 0, PGSIZE);
     mappages(pgdir, (char*)a, PGSIZE, v2p(mem), PTE_W|PTE_U);
+  }
+  return newsz;
+}
+
+
+
+
+
+int
+dallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
+{
+ // char *mem;
+  uint a;
+
+  if(newsz >= KERNBASE)
+    return 0;
+  if(newsz < oldsz)
+    return oldsz;
+
+  a = PGROUNDUP(oldsz);
+  for(; a < newsz; a += PGSIZE){
+ //   mem = kalloc();
+   // if(mem == 0){
+    //  cprintf("allocuvm out of memory\n");
+   //   deallocuvm(pgdir, newsz, oldsz);
+   //   return 0;
+   // }
+    //memset(mem, 0, PGSIZE);
+    dmappages(pgdir, (char*)a, PGSIZE, ~PTE_P);
   }
   return newsz;
 }
