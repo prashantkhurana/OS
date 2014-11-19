@@ -272,7 +272,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 int
 dallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
- // char *mem;
+ //z char *mem;
   uint a;
 
   if(newsz >= KERNBASE)

@@ -45,6 +45,11 @@ trap(struct trapframe *tf)
       exit();
     return;
   }
+  
+   if(tf->trapno == T_PGFLT){
+     allocuvm(proc->pgdir,rcr2(),rcr2()+1);
+      return;
+  }
 
   switch(tf->trapno){
   case T_IRQ0 + IRQ_TIMER:
