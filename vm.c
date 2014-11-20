@@ -10,7 +10,7 @@
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 struct segdesc gdt[NSEGS];
-
+unsigned char pages_shared[1000000];
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
 void
@@ -64,6 +64,30 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   return &pgtab[PTX(va)];
 }
 
+
+
+static pte_t *
+cowwalkpgdir(pde_t *pgdir, const void *va, int alloc)
+{
+  pde_t *pde;
+  pte_t *pgtab;
+
+  pde = &pgdir[PDX(va)];
+  if(*pde & PTE_P){
+    pgtab = (pte_t*)p2v(PTE_ADDR(*pde));
+  } else {
+    if(!alloc || (pgtab = (pte_t*)kalloc()) == 0)
+      return 0;
+    // Make sure all those PTE_P bits are zero.
+    memset(pgtab, 0, PGSIZE);
+    // The permissions here are overly generous, but they can
+    // be further restricted by the permissions in the page table 
+    // entries, if necessary.
+    *pde = v2p(pgtab) | PTE_P | ~PTE_W | PTE_U;
+  }
+  return &pgtab[PTX(va)];
+}
+
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.
@@ -77,6 +101,30 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
+      return -1;
+    if(*pte & PTE_P)
+      panic("remap");
+    *pte = pa | perm | PTE_P;
+    if(a == last)
+      break;
+    a += PGSIZE;
+    pa += PGSIZE;
+  }
+  return 0;
+}
+
+
+
+static int
+cowmappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
+{
+  char *a, *last;
+  pte_t *pte;
+  
+  a = (char*)PGROUNDDOWN((uint)va);
+  last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+  for(;;){
+    if((pte = cowwalkpgdir(pgdir, a, 1)) == 0)
       return -1;
     if(*pte & PTE_P)
       panic("remap");
@@ -335,6 +383,47 @@ bad:
   freevm(d);
   return 0;
 }
+
+
+
+
+pde_t*
+cowcopyuvm(pde_t *pgdir, uint sz)
+{
+  pde_t *d;
+  pte_t *pte;
+  uint pa, i, flags;
+//  char *mem;
+
+  if((d = setupkvm()) == 0)
+    return 0;
+  for(i = 0; i < sz; i += PGSIZE){
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("copyuvm: page not present");
+    pa = PTE_ADDR(*pte);
+    flags = PTE_FLAGS(*pte);
+    flags=flags&~PTE_W;
+    
+    //if((mem = kalloc()) == 0)
+     // goto bad;
+   // memmove(mem, (char*)p2v(pa), PGSIZE);
+    if(cowmappages(d, (void*)i, PGSIZE, pa , flags) < 0)
+      goto bad;
+    *pte=pa|flags;
+    pa=pa>>12;
+    pa=(uint)p2v(pa);
+    pages_shared[pa]++;
+  }
+  lcr3(v2p(pgdir));
+  return d;
+
+bad:
+  freevm(d);
+  return 0;
+}
+
 
 //PAGEBREAK!
 // Map user virtual address to kernel address.

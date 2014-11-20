@@ -167,8 +167,12 @@ fork(void)
 }
 
 
+
+
+
+
 int
-fork(void)
+cowfork(void)
 {
   int i, pid;
   struct proc *np;
@@ -207,6 +211,8 @@ fork(void)
   
   return pid;
 }
+
+
 
 
 // Exit the current process.  Does not return.
