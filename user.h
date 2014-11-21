@@ -9,6 +9,11 @@ struct rtcdate;
 #define PROT_READ 1
 #define PROT_WRITE 2
 
+struct error
+{
+  void * addr;
+  int trap_no;
+};
 
 // system calls
 int fork(void);

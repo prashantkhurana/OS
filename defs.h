@@ -9,6 +9,13 @@ struct spinlock;
 struct stat;
 struct superblock;
 
+
+struct error
+{
+  void * addr;
+  int trap_no;
+};
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
@@ -125,7 +132,7 @@ void            yield(void);
 int 		signal(int signum, sighandler_t handler);
 int 		retsignal(void);
 int 		alarm_process(void);
-void            register_handler(sighandler_t sighandler1,sighandler_t sighandler2);
+void            register_handler(struct error x, sighandler_t sighandler1,sighandler_t sighandler2);
 // swtch.S
 void            swtch(struct context**, struct context*);
 

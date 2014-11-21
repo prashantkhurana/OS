@@ -34,8 +34,18 @@ idtinit(void)
 
 
 void
-register_handler(sighandler_t sighandler, sighandler_t sighandler2)
+register_handler(struct error x,sighandler_t sighandler, sighandler_t sighandler2)
 {
+
+proc->tf->esp -= 4;  
+ *(int*)(((proc->tf->esp)))
+    = (uint)x.trap_no; 
+    
+proc->tf->esp -= 4;  
+ *(int*)(((proc->tf->esp)))
+    = (uint)x.addr; 
+    
+  
 proc->tf->esp -= 4;  
  *(int*)(((proc->tf->esp)))
     = (uint)sighandler;
@@ -65,7 +75,10 @@ trap(struct trapframe *tf)
   if(tf->trapno == T_PGFLT){
     if(proc->signalHandlers[0]!=(sighandler_t) -1)
     {
-      register_handler(proc->signalHandlers[0],proc->signalHandlers[2]);	
+      struct error x;
+      x.trap_no=14;
+      x.addr=(void *)rcr2();
+      register_handler(x,proc->signalHandlers[0],proc->signalHandlers[2]);	
       return;
     }
   }
@@ -134,22 +147,22 @@ trap(struct trapframe *tf)
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
     exit();
   
-   if(proc && proc->signalhex && (tf->cs&3) == DPL_USER)
-   {
-     if(proc->signalhex==1)
-      {
-	if(proc->signalHandlers[1]!=(sighandler_t) -1)
-      {
-      register_handler(proc->signalHandlers[1],proc->signalHandlers[2]);
-      }
-      else
-      {
-// 	release(&ptable.lock);
-	kill(proc->pid);
-// 	acquire(&ptable.lock);
-      }
-      }
-      proc->signalhex=0;
-   }
+//    if(proc && proc->signalhex && (tf->cs&3) == DPL_USER)
+//    {
+//      if(proc->signalhex==1)
+//       {
+// 	if(proc->signalHandlers[1]!=(sighandler_t) -1)
+//       {
+//       register_handler(proc->signalHandlers[1],proc->signalHandlers[2]);
+//       }
+//       else
+//       {
+// // 	release(&ptable.lock);
+// 	kill(proc->pid);
+// // 	acquire(&ptable.lock);
+//       }
+//       }
+//       proc->signalhex=0;
+//    }
    
 }

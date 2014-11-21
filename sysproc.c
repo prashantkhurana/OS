@@ -142,7 +142,7 @@ sys_mpro(void)
     return -1;
   if(argint(2, &prot)<0)
     return -1;
-  cprintf("Len and prot are:");
+  //cprintf("Len and prot are:");
   return mprotect(addr,len,prot);
   return 1;
 }

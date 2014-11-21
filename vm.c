@@ -388,7 +388,7 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 int mprotect(void *addr, int len, int prot)
 {
   //return 1;
-  cprintf("PID :%d", proc->pid);
+  //cprintf("PID :%d", proc->pid);
   //return 1;
  pte_t *pte;
  //char *a, *last;
