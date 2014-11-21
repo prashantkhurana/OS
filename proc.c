@@ -83,6 +83,7 @@ userinit(void)
   
   p = allocproc();
   initproc = p;
+  //cprintf("INIT PROC IS %d\n",p->pid);
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
@@ -157,7 +158,7 @@ fork(void)
   safestrcpy(np->name, proc->name, sizeof(proc->name));
  
   pid = np->pid;
-
+//cprintf("parent and child pid are in oroginal fork  %d %d \n",proc->pid,pid);
   // lock to force the compiler to emit the np->state write last.
   acquire(&ptable.lock);
   np->state = RUNNABLE;
@@ -174,6 +175,7 @@ fork(void)
 int
 cowfork(void)
 {
+  
   int i, pid;
   struct proc *np;
 
@@ -194,7 +196,7 @@ cowfork(void)
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
-
+  
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
@@ -203,7 +205,7 @@ cowfork(void)
   safestrcpy(np->name, proc->name, sizeof(proc->name));
  
   pid = np->pid;
-
+  //cprintf("parent and child pid are %d %d \n",proc->pid,pid);
   // lock to force the compiler to emit the np->state write last.
   acquire(&ptable.lock);
   np->state = RUNNABLE;
@@ -248,6 +250,8 @@ exit(void)
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == proc){
+      //	cprintf("I AM %d and my child going to init proc is %d and init proc is  %d\n",proc->pid,p->pid,initproc->pid);
+
       p->parent = initproc;
       if(p->state == ZOMBIE)
         wakeup1(initproc);
@@ -279,6 +283,7 @@ wait(void)
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
+	//cprintf("I AM %d and ZOMBIE CHILD IS %d\n",p->parent->pid,pid);
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);

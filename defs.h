@@ -181,5 +181,6 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 pde_t*          cowcopyuvm(pde_t*, uint);
+void            cowcopy(pde_t *pgdir, void *va);
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

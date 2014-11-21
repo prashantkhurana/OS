@@ -10,7 +10,7 @@
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 struct segdesc gdt[NSEGS];
-unsigned char pages_shared[1000000];
+static unsigned char pages_shared[1048578];
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
 void
@@ -83,7 +83,7 @@ cowwalkpgdir(pde_t *pgdir, const void *va, int alloc)
     // The permissions here are overly generous, but they can
     // be further restricted by the permissions in the page table 
     // entries, if necessary.
-    *pde = v2p(pgtab) | PTE_P | ~PTE_W | PTE_U;
+    *pde = v2p(pgtab) | PTE_P | PTE_W | PTE_U;
   }
   return &pgtab[PTX(va)];
 }
@@ -102,8 +102,8 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
-    if(*pte & PTE_P)
-      panic("remap");
+    //if(*pte & PTE_P)
+      //panic("remap");
     *pte = pa | perm | PTE_P;
     if(a == last)
       break;
@@ -320,6 +320,43 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   return newsz;
 }
 
+
+
+int
+cowdeallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
+{
+  pte_t *pte;
+  uint a, pa;
+
+  if(newsz >= oldsz)
+    return oldsz;
+
+  a = PGROUNDUP(newsz);
+  for(; a  < oldsz; a += PGSIZE){
+    pte = walkpgdir(pgdir, (char*)a, 0);
+    if(!pte)
+      a += (NPTENTRIES - 1) * PGSIZE;
+    else if((*pte & PTE_P) != 0){
+      pa = PTE_ADDR(*pte);
+      if(pa == 0)
+        panic("kfree");
+      uint  pa2=pa>>12;
+         // cprintf("Pa2 value in deallocuvm: %d\n",pa2);
+          //cprintf("pages shared in deallocuvm : %d\n ",pages_shared[pa2]);
+      if(pages_shared[pa2]==0)
+    {
+      char *v = p2v(pa);
+      kfree(v);
+      *pte = 0;
+    }
+    else
+      pages_shared[pa2]--;
+      
+  }
+  }
+  return newsz;
+}
+
 // Free a page table and all the physical memory pages
 // in the user part.
 void
@@ -329,7 +366,7 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, KERNBASE, 0);
+  cowdeallocuvm(pgdir, KERNBASE, 0);
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P){
       char * v = p2v(PTE_ADDR(pgdir[i]));
@@ -392,16 +429,22 @@ cowcopyuvm(pde_t *pgdir, uint sz)
 {
   pde_t *d;
   pte_t *pte;
-  uint pa, i, flags;
+  uint pa, i, flags,pa2;
 //  char *mem;
-
+  //cprintf("the parent size is:%d\n",sz);
+  
   if((d = setupkvm()) == 0)
     return 0;
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
-      panic("copyuvm: pte should exist");
+       panic("cowcopyuvm: pte should exist");
+      pa2 = PTE_ADDR(*pte);
+      pa2=pa2>>12;
+    //pa=(uint)(pa);
+    //cprintf("I is %d and Pa2 value in cowcopyuvm: %d\n",i,pa2);
+     
     if(!(*pte & PTE_P))
-      panic("copyuvm: page not present");
+      panic("cowcopyuvm: page not present");
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
     flags=flags&~PTE_W;
@@ -413,8 +456,16 @@ cowcopyuvm(pde_t *pgdir, uint sz)
       goto bad;
     *pte=pa|flags;
     pa=pa>>12;
-    pa=(uint)p2v(pa);
+    pa=(uint)(pa);
+    //cprintf("I is %d and Pa value in cowcopyuvm: %d\n",i,pa);
+    //int i;
+    //for(i=0;i<10000;i++)
+    //{
+     // cprintf("%d ",pages_shared[i]);
+    //}
+    //cprintf("pages shared in cowcopyuvm : %d\n ",pages_shared[pa]);
     pages_shared[pa]++;
+  //  cprintf(" done ");
   }
   lcr3(v2p(pgdir));
   return d;
@@ -473,3 +524,56 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
+
+void
+cowcopy(pde_t *pgdir, void *va)
+{
+  //pde_t *d;
+  pte_t *pte;
+  uint pa,  flags;
+  char *mem;
+
+  //if((d = setupkvm()) == 0)
+    //return 0;
+  //for(i = 0; i < sz; i += PGSIZE){
+    va = (void*)PGROUNDDOWN((uint)va);
+    if((pte = walkpgdir(pgdir, (void *) va, 0)) == 0)
+      panic("cowcopy: pte should exist");
+    
+    uint  pa3 = PTE_ADDR(*pte);
+      pa3=pa3>>12;
+   // cprintf("Pa3 value in cowcopy: %d\n",pa3);
+    
+    if(!(*pte & PTE_P))
+      panic("cowcopy: page not present");
+    pa = PTE_ADDR(*pte);
+    uint  pa2=pa>>12;
+    //pa=(uint)(pa);
+    flags = PTE_FLAGS(*pte);
+    flags=flags|PTE_W;
+    // cprintf("Pa2 value in cowcopy: %d\n",pa2);
+    //cprintf("pages shared in cowcopy : %d\n ",pages_shared[pa2]);
+
+    if(pages_shared[pa2]>0)
+    {
+     // if((
+	mem = kalloc();
+      //goto bad;
+    memmove(mem, (char*)p2v(pa), PGSIZE);
+    pages_shared[pa2]--;
+    mappages(pgdir, (void*)va, PGSIZE, v2p(mem), flags);
+      //goto bad;
+    }
+    else
+    {
+      flags=flags|PTE_W;
+      *pte=pa|flags;
+    }
+    
+  //}
+  return ;
+/*
+bad:
+  freevm(d);
+  return ;*/
+}

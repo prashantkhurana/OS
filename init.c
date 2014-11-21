@@ -22,6 +22,7 @@ main(void)
   for(;;){
     printf(1, "init: starting sh\n");
     pid = fork();
+   // printf(1, "child is %d . USed for debgging purposes\n",pid);
     if(pid < 0){
       printf(1, "init: fork failed\n");
       exit();
@@ -31,7 +32,8 @@ main(void)
       printf(1, "init: exec sh failed\n");
       exit();
     }
-    while((wpid=wait()) >= 0 && wpid != pid)
-      printf(1, "zombie!\n");
+    //wait();
+    while((wpid=wait()) >= 0 && wpid != pid);
+     // printf(1, "zombie!\n");
   }
 }
