@@ -14,7 +14,7 @@ int i;
 
 
 
-int dsbrk_alloc_time,dsbrk_write_time;
+int dsbrk_alloc_time=0,dsbrk_write_time=0;
 int before,after, after2;
 printf(1,"dsbrk started\n");
 for(i=0;i<num;i++)
@@ -35,7 +35,7 @@ printf(1,"dsbrk done\n");
 
 printf(1,"sbrk started\n");
 
-int sbrk_alloc_time,sbrk_write_time;
+int sbrk_alloc_time=0,sbrk_write_time=0;
 for(i=0;i<num;i++)
 {
 //printf(1,"%d ",i);  
