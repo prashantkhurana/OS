@@ -6,13 +6,26 @@
 #include "mmu.h"
 #include "proc.h"
 #include "elf.h"
+#include "spinlock.h"
 
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 struct segdesc gdt[NSEGS];
-static unsigned char pages_shared[1048578];
+
+struct{
+
+unsigned char pages_shared[1048578];
+struct spinlock lock;
+}pages_s;
+
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
+
+
+void pagesinit(void)
+{
+  initlock(&pages_s.lock,"pages");
+}
 void
 seginit(void)
 {
@@ -343,15 +356,16 @@ cowdeallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       uint  pa2=pa>>12;
          // cprintf("Pa2 value in deallocuvm: %d\n",pa2);
           //cprintf("pages shared in deallocuvm : %d\n ",pages_shared[pa2]);
-      if(pages_shared[pa2]==0)
+      acquire(&pages_s.lock);
+      if(pages_s.pages_shared[pa2]==0)
     {
       char *v = p2v(pa);
       kfree(v);
       *pte = 0;
     }
     else
-      pages_shared[pa2]--;
-      
+      pages_s.pages_shared[pa2]--;
+    release(&pages_s.lock);
   }
   }
   return newsz;
@@ -464,7 +478,9 @@ cowcopyuvm(pde_t *pgdir, uint sz)
      // cprintf("%d ",pages_shared[i]);
     //}
     //cprintf("pages shared in cowcopyuvm : %d\n ",pages_shared[pa]);
-    pages_shared[pa]++;
+    acquire(&pages_s.lock);
+    pages_s.pages_shared[pa]++;
+    release(&pages_s.lock);
   //  cprintf(" done ");
   }
   lcr3(v2p(pgdir));
@@ -553,14 +569,14 @@ cowcopy(pde_t *pgdir, void *va)
     flags=flags|PTE_W;
     // cprintf("Pa2 value in cowcopy: %d\n",pa2);
     //cprintf("pages shared in cowcopy : %d\n ",pages_shared[pa2]);
-
-    if(pages_shared[pa2]>0)
+    acquire(&pages_s.lock);
+    if(pages_s.pages_shared[pa2]>0)
     {
      // if((
 	mem = kalloc();
       //goto bad;
     memmove(mem, (char*)p2v(pa), PGSIZE);
-    pages_shared[pa2]--;
+    pages_s.pages_shared[pa2]--;
     mappages(pgdir, (void*)va, PGSIZE, v2p(mem), flags);
       //goto bad;
     }
@@ -569,6 +585,7 @@ cowcopy(pde_t *pgdir, void *va)
       flags=flags|PTE_W;
       *pte=pa|flags;
     }
+    release(&pages_s.lock);
     
   //}
   return ;
