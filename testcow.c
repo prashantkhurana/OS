@@ -7,7 +7,7 @@
 int
 main(int argc, char *argv[])
 {
-  int num=100;
+  int num=1000;
   int pid;
   int i;
   void *addr=malloc(24576*2*2*2);
