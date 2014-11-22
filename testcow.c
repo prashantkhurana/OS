@@ -7,11 +7,15 @@
 int
 main(int argc, char *argv[])
 {
-//  int num=10000;
+  int num=100;
   int pid;
   int i;
-  printf(1,"Starting Time%d\n ",uptime());  
-  for(i=0;i<1000;i++)
+  void *addr=malloc(24576*2*2);
+  *(int *)addr=0;
+  int start,end,avg_fork,avg_cowfork;
+  printf(1,"Starting Fork\n ");
+  start=uptime();
+  for(i=0;i<num;i++)
   {
     pid=fork();
     if(pid==0)
@@ -21,13 +25,18 @@ main(int argc, char *argv[])
     else
     {
       wait();
-        printf(1,"%d ",i);  
     }
   }
-  
-  
- printf(1,"\nFinal Time %d\n ",uptime());    
-  for(i=0;i<1000;i++)
+//  printf(1,"Starting Fork:%d \n ",uptime());
+   end=uptime();
+   avg_fork=(end-start)/num;
+   //printf(1,"End Fork\n: %d ",end-start);
+// 
+  printf(1,"Avg Time for fork: %d\n",avg_fork);
+ printf(1,"Starting Cow Fork\n");
+
+ start=uptime();
+  for(i=0;i<num;i++)
   {
     pid=cowfork();
     if(pid==0)
@@ -37,11 +46,15 @@ main(int argc, char *argv[])
     else
     {
       wait();
-        printf(1,"%d ",i);  
+     //   printf(1,"%d ",i);  
     }
   }
- // exit();
- printf(1,"\nFinal TIme %d\n ",uptime());
+  //printf(1,"Starting Cow Fork%d\n ",uptime());
+  end=uptime();
+  avg_cowfork=(end-start)/num;
+//   printf(1,"End cowFork\n: %d ",end-start);
+// 
+  printf(1,"Avg Time for Cowfork:%d\n",avg_cowfork);
   exit();
 }
 

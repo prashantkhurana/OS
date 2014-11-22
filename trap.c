@@ -45,11 +45,11 @@ trap(struct trapframe *tf)
       exit();
     return;
   }
-      if(tf->trapno == T_PGFLT){
-	void *va=(void *)rcr2();
-      cowcopy(proc->pgdir,va);
-       return;
-   }
+       if(tf->trapno == T_PGFLT){
+ 	void *va=(void *)rcr2();
+       cowcopy(proc->pgdir,va);
+        return;
+    }
 
 
   switch(tf->trapno){
