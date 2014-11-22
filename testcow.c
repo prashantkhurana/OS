@@ -10,7 +10,7 @@ main(int argc, char *argv[])
   int num=100;
   int pid;
   int i;
-  void *addr=malloc(24576*2*2);
+  void *addr=malloc(24576*2*2*2);
   *(int *)addr=0;
   int start,end,avg_fork,avg_cowfork;
   printf(1,"Starting Fork\n ");
