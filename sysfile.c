@@ -69,11 +69,100 @@ sys_read(void)
   struct file *f;
   int n;
   char *p;
+  
+  int fd;
+    argint(0,&fd);
+
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+  int i;
+  for(i=0;i<NOFILE;i++)
+  {
+    if(proc->mtable[i].ip->inum==f->ip->inum   
+      &&    f->off >= proc->mtable[i].offset 
+      &&   f->off <= (proc->mtable[i].offset+proc->mtable[i].length))
+    {
+      
+    //  cprintf("Doing mem read\n");
+//       int j; 
+//       cprintf("%x",proc->mtable[i].addr);
+//       char buf[25];
+//  for( j=0;j<20;j++)
+//  {
+//    buf[j]=*(((char*)proc->mtable[i].addr)+j);
+//  }
+ 
+ //cprintf("%s\n",buf);
+      memmove(p,proc->mtable[i].addr,n);
+      return 1;
+    }
+  }
+  
+  //cprintf("Doing actual read\n");
   return fileread(f, p, n);
 }
+
+int sys_sleek()
+{
+    struct file *f;
+    int n;
+    argfd(0, 0, &f);
+    argint(1, &n);
+  //  cprintf("the offset received is :%d\n", n);
+    f->off=n;
+    
+    return 1;
+
+}
+
+
+
+int
+sys_mmap(void)
+{
+  struct file *f;
+  argfd(4, 0, &f);
+  int fd;
+  argint(4,&fd);
+  int length;
+  argint(1, &length);
+  char *p;
+  argptr(0, &p, length);
+  int offset;
+  argint(5, &offset);
+  int prot;
+  argint(1, &prot);
+//  cprintf("the offset in the mmap is : %d\n",offset);
+ // sleek(fd,offset);
+  
+  //void *addr, uint length, int prot, int flags, int fd, uint offset
+  //argint(5, &n);
+  
+  
+  //n=100;
+  
+  int i;
+  for(i=0;i<NOFILE;i++)
+  {
+    if(proc->mtable[i].length==0)
+    {
+	  proc->mtable[i].offset=offset;
+	  proc->mtable[i].ip=f->ip;
+	  proc->mtable[i].addr=(void *)p;
+	  proc->mtable[i].length=length;
+	  proc->mtable[i].ip=f->ip;
+	  proc->mtable[i].prot=prot;
+	  fileread(f, p, length);
+	  return 1;
+    }
+  }
+  return 0;
+}
+
+
+
+
 
 int
 sys_write(void)
@@ -84,6 +173,29 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+  
+  
+  int i;
+  for(i=0;i<NOFILE;i++)
+  {
+    if(proc->mtable[i].ip->inum==f->ip->inum   
+      &&    f->off >= proc->mtable[i].offset 
+      &&   (f->off+n) <= (proc->mtable[i].offset+proc->mtable[i].length))
+    {
+      
+    //cprintf("Doing mem write\n");
+//       int j; 
+//       cprintf("%x",proc->mtable[i].addr);
+//       char buf[25];
+//  for( j=0;j<20;j++)
+//  {
+//    buf[j]=*(((char*)proc->mtable[i].addr)+j);
+//  }
+ 
+ //cprintf("%s\n",buf);
+      memmove(proc->mtable[i].addr+(f->off-proc->mtable[i].offset),p,n);
+    }
+  }
   return filewrite(f, p, n);
 }
 
@@ -113,6 +225,7 @@ sys_fstat(void)
 
 // Create the path new as a link to the same inode as old.
 int
+
 sys_link(void)
 {
   char name[DIRSIZ], *new, *old;
@@ -279,6 +392,9 @@ create(char *path, short type, short major, short minor)
 
   return ip;
 }
+
+
+
 
 int
 sys_open(void)

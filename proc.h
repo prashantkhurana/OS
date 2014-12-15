@@ -39,7 +39,7 @@ extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
 // Contexts are stored at the bottom of the stack they
 // describe; the stack pointer is the address of the context.
 // The layout of the context matches the layout of the stack in swtch.S
-// at the "Switch stacks" comment. Switch doesn't save eip explicitly,
+// at the "Switch slengttacks" comment. Switch doesn't save eip explicitly,
 // but it is on the stack and allocproc() manipulates it.
 struct context {
   uint edi;
@@ -50,6 +50,18 @@ struct context {
 };
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+
+
+struct m_map {
+  
+  void *addr;
+  uint length;
+  int prot;
+  int flags;
+  struct inode *ip;
+  uint offset;
+} ;
+
 
 // Per-process state
 struct proc {
@@ -66,7 +78,9 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  struct m_map mtable[NOFILE];
 };
+
 
 // Process memory is laid out contiguously, low addresses first:
 //   text

@@ -24,6 +24,9 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
+int mmap(void *addr, uint length, int prot, int flags, int fd, uint offset);
+int sleek (int fd, uint offset);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
