@@ -1,0 +1,25 @@
+From 69bea696bf492330834922bea64939c4d8cea4e1 Mon Sep 17 00:00:00 2001
+From: Prashant <prashant.khurana@cs.rutgers.edu>
+Date: Sun, 21 Dec 2014 23:27:36 -0500
+Subject: [PATCH 5/5] small error removed
+
+---
+ defs.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/defs.h b/defs.h
+index 9b23548..986ecd9 100644
+--- a/defs.h
++++ b/defs.h
+@@ -9,7 +9,7 @@ struct spinlock;
+ struct stat;
+ struct superblock;
+ 
+-typedef uint pte_t;
++//typedef uint pte_t;
+ 
+ // bio.c
+ void            binit(void);
+-- 
+1.9.1
+
